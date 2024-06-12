@@ -78,7 +78,7 @@ return {
             },
             sections = {
                 lualine_a = { { lowercase_mode, separator = { left = '' }, right_padding = 2 } },
-                lualine_b = { 'filename', 'diagnostics' },
+                lualine_b = { 'filename', 'branch', 'diagnostics' },
                 lualine_c = {
                     '%=', --[[ add your center components here in place of this comment ]]
                 },
