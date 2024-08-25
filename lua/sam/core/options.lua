@@ -1,6 +1,7 @@
 vim.opt.nu = true
 vim.opt.wrap = false
 vim.opt.scrolloff = 999
+vim.opt.fillchars = "eob: "
 
 vim.opt.swapfile = false
 vim.opt.backup = false

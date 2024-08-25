@@ -10,6 +10,8 @@ function ClearBackground(color)
 		"DiagnosticSignWarn",
 		"DiagnosticSignInfo",
 		"DiagnosticSignHint",
+        -- "Pmenu",
+        -- "PmenuSel",
     }
 
     for _, group in ipairs(groups) do
@@ -21,10 +23,21 @@ function ClearBackground(color)
 end
 
 return {
-    {
+	{ 
+		"rose-pine/neovim", 
+		name = "rose-pine",
+		config = function()
+			ClearBackground("rose-pine")
+		end
+	},
+	{
+		"bluz71/vim-nightfly-colors",
+		name = "nightfly" ,
+	},
+	{
         'ellisonleao/gruvbox.nvim',
-        config = function()
-            ClearBackground()
-        end
+        -- config = function()
+        --     ClearBackground()
+        -- end
     },
 }

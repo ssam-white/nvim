@@ -17,7 +17,7 @@ return {
         mason.setup()
         mason_lspconfig.setup()
 
-        vim.api.nvim_create_autocmd("LspAttach", {
+		vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("UserLspConfig", {}),
             callback = function(ev)
                 local opts = { buffer = ev.buf, silent = true }
@@ -34,6 +34,9 @@ return {
                 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                 vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
+				vim.keymap.set("n", "<Leader>=", function()
+					vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+				end, { buffer = bufnr, desc = "[lsp] format" })
             end,
         })
 
@@ -52,9 +55,17 @@ return {
             end
         })
 
-        lspconfig['hls'].setup({
-            filetypes = { 'haskell', 'lhaskell', 'cabal' },
+        lspconfig.zls.setup{
             capabilities = capabilities,
-        })
+            on_attach = function(client, bufnr)
+                vim.api.nvim_clear_autocmds({
+                    event = "BufWritePre",
+                    group = "vim-zig",
+                    buffer = bufnr,
+                })
+            end,
+        }
+
+
     end
 }

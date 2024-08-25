@@ -19,6 +19,7 @@ return {
             -- ensure these language parsers are installed
             ensure_installed = {
                 "javascript",
+				"json",
                 "typescript",
                 "yaml",
                 "markdown",
@@ -29,6 +30,8 @@ return {
                 "zig",
                 "rust",
                 "go",
+				"v",
+				"vue",
             },
             incremental_selection = {
                 enable = true,
