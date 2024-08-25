@@ -34,9 +34,7 @@ return {
                 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                 vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
-				vim.keymap.set("n", "<Leader>=", function()
-					vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
-				end, { buffer = bufnr, desc = "[lsp] format" })
+				vim.keymap.set("n", "<Leader>=", function() vim.lsp.buf.format({ buffer = ev.buf }) end, opts)
             end,
         })
 
