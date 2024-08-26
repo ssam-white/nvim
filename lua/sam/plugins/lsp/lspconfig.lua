@@ -1,5 +1,5 @@
 return {
-    "neovim/nvim-lspconfig",
+	"neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
         "williamboman/mason.nvim",
@@ -35,6 +35,7 @@ return {
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                 vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
 				vim.keymap.set("n", "<Leader>=", function() vim.lsp.buf.format({ buffer = ev.buf }) end, opts)
+				vim.keymap.set("i", "<C-/>", function() vim.lsp.buf.format({ buffer = ev.buf }) end, opts)
             end,
         })
 
