@@ -1,70 +1,99 @@
 return {
 	"neovim/nvim-lspconfig",
-    event = { "BufReadPre", "BufNewFile" },
-    dependencies = {
-        "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim",
-        "hrsh7th/cmp-nvim-lsp",
-        { "antosha417/nvim-lsp-file-operations", config = true },
-        { "folke/neodev.nvim", opts = {} },
-    },
-    config = function()
-        local lspconfig = require("lspconfig")
-        local mason = require("mason")
-        local mason_lspconfig = require("mason-lspconfig")
-        local cmp_nvim_lsp = require("cmp_nvim_lsp")
+	event = { "BufReadPre", "BufNewFile" },
+	dependencies = {
+		"williamboman/mason.nvim",
+		"williamboman/mason-lspconfig.nvim",
+		"hrsh7th/cmp-nvim-lsp",
+		{ "antosha417/nvim-lsp-file-operations", config = true },
+		{ "folke/neodev.nvim",                   opts = {} },
+	},
+	config = function()
+		local lspconfig = require("lspconfig")
+		local mason = require("mason")
+		local mason_lspconfig = require("mason-lspconfig")
+		local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-        mason.setup()
-        mason_lspconfig.setup()
+		mason.setup()
+		mason_lspconfig.setup()
 
 		vim.api.nvim_create_autocmd("LspAttach", {
-            group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-            callback = function(ev)
-                local opts = { buffer = ev.buf, silent = true }
-                vim.keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts)
-                vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-                vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
-                vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
-                vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
-                vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
-                vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-                vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
-                vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
-                vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-                vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-                vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-                vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
+			group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+			callback = function(ev)
+				local opts = { buffer = ev.buf, silent = true }
+				vim.keymap.set("n", "gR", "<cmd>Telescope lsp_references<CR>", opts)
+				vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+				vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
+				vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
+				vim.keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
+				vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+				vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
+				vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
+				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+				vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+				vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
 				vim.keymap.set("n", "<Leader>=", function() vim.lsp.buf.format({ buffer = ev.buf }) end, opts)
 				vim.keymap.set("i", "<C-/>", function() vim.lsp.buf.format({ buffer = ev.buf }) end, opts)
-            end,
-        })
+			end,
+		})
 
-        local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-        for type, icon in pairs(signs) do
-            local hl = "DiagnosticSign" .. type
-            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-        end
+		local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
+		for type, icon in pairs(signs) do
+			local hl = "DiagnosticSign" .. type
+			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+		end
 
-        local capabilities = cmp_nvim_lsp.default_capabilities()
-        mason_lspconfig.setup_handlers({
-            function(server_name)
-                lspconfig[server_name].setup({
-                    capabilities = capabilities,
-                })
-            end
-        })
+		local capabilities = cmp_nvim_lsp.default_capabilities()
+		mason_lspconfig.setup_handlers({
+			function(server_name)
+				lspconfig[server_name].setup({
+					capabilities = capabilities,
+				})
+			end
+		})
 
-        lspconfig.zls.setup{
-            capabilities = capabilities,
-            on_attach = function(client, bufnr)
-                vim.api.nvim_clear_autocmds({
-                    event = "BufWritePre",
-                    group = "vim-zig",
-                    buffer = bufnr,
-                })
-            end,
-        }
+		lspconfig.lua_ls.setup {
+			on_init = function(client)
+				local path = client.workspace_folders[1].name
+				if not vim.loop.fs_stat(path .. '/.luarc.json') and not vim.loop.fs_stat(path .. '/.luarc.jsonc') then
+					client.config.settings = vim.tbl_deep_extend('force', client.config.settings, {
+						Lua = {
+							runtime = {
+								-- Tell the language server which version of Lua you're using
+								-- (most likely LuaJIT in the case of Neovim)
+								version = 'LuaJIT'
+							},
+							-- Make the server aware of Neovim runtime files
+							workspace = {
+								checkThirdParty = false,
+								library = {
+									vim.env.VIMRUNTIME
+									-- "${3rd}/luv/library"
+									-- "${3rd}/busted/library",
+								}
+								-- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+								-- library = vim.api.nvim_get_runtime_file("", true)
+							}
+						}
+					})
 
+					client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
+				end
+				return true
+			end
+		}
 
-    end
+		lspconfig.zls.setup {
+			capabilities = capabilities,
+			on_attach = function(client, bufnr)
+				vim.api.nvim_clear_autocmds({
+					event = "BufWritePre",
+					group = "vim-zig",
+					buffer = bufnr,
+				})
+			end,
+		}
+	end
 }
